@@ -1,5 +1,5 @@
 # MobileV2 Pruning
-This repository aim to try out different pruning-approaches on lightweight Backbones()
+This repository aim to try out different pruning-approaches on lightweight Backbones.
 
 ## Usage
 1. Training (about with ReduceLROnPlateau scheduler)
