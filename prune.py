@@ -8,7 +8,9 @@ import models
 import torch.optim as optim
 from os.path import join
 import json
-os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+
+from thop import clever_format,profile
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 parser = argparse.ArgumentParser(description='Mobilev2 Pruner')
 parser.add_argument('--dataset', type=str, default='cifar10',
@@ -82,6 +84,13 @@ if args.pruner=='SlimmingPruner':
 pruner=pruner.__dict__[args.pruner](model=model,newmodel=newmodel,testset=test_loader,trainset=train_loader,
                                     optimizer=optimizer,args=args,**kwargs)
 pruner.prune()
+##---------count op
+input=torch.randn(1,3,32,32).cuda()
+flops, params = profile(model, inputs=(input, ),verbose=False)
+flops, params = clever_format([flops, params], "%.3f")
+flopsnew, paramsnew = profile(newmodel, inputs=(input, ),verbose=False)
+flopsnew, paramsnew = clever_format([flopsnew, paramsnew], "%.3f")
+print("flops:{}->{}, params: {}->{}".format(flops,flopsnew,params,paramsnew))
 accold=pruner.test(newmodel=False)
 
 accpruned=pruner.test(newmodel=True)

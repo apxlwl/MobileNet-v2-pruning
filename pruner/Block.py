@@ -72,11 +72,7 @@ class InverRes(Baselayer):
             self._cloneBN(modulelayers[3], self.statedict[6:10], torch.arange(self.statedict[6].shape[0]))
 
         if self.numlayer == 3:
-            # if self.layername=='features.17':
-            #     print(inputmask)
-            #     print(self.prunemask)
-            #     print(len(self.prunemask))
-            #     assert 0
+
             temp = self.statedict[0][:, inputmask.tolist(), :, :]
             modulelayers[0].weight.data = temp[self.prunemask.tolist(), :, :, :].clone()
             self._cloneBN(modulelayers[1],self.statedict[1:5],self.prunemask)
