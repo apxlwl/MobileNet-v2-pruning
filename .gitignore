@@ -1,0 +1,9 @@
+*.pyc
+*/__pycache__
+.idea/
+checkpoints/
+summary/
+data.cifar10/
+data.cifar100/
+*mine.py
+*.txt
