@@ -40,7 +40,7 @@ class CB(Baselayer):
         # 'conv.weight', 'bn.weight', 'bn.bias', 'bn.running_mean', 'bn.running_var'
         self.inputchannel = self.statedict[0].shape[1]
         self.outputchannel = self.statedict[-1].shape[0]
-        self.bnscale=self.statedict[1]
+        self.bnscale=self.statedict[1].abs().clone()
     def clone2module(self, module: nn.Module, inputmask,keepoutput=False):
         modulelayers = [m for m in module.modules() if isinstance(m, nn.Conv2d) or isinstance(m, nn.BatchNorm2d)]
         temp = self.statedict[0][:, inputmask.tolist(), :, :]
@@ -58,7 +58,7 @@ class InverRes(Baselayer):
         self.outputchannel = self.statedict[-1].shape[0]
         self.numlayer = len(self.statedict) // 5
         if self.numlayer==3:
-            self.bnscale=self.statedict[1]
+            self.bnscale=self.statedict[1].abs().clone()
         else:
             self.bnscale=None
     def clone2module(self, module: nn.Module, inputmask,keepoutput=False):

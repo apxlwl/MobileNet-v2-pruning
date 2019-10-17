@@ -17,9 +17,9 @@ This repository aim to try out different pruning-approaches on lightweight Backb
 |MobileV2| L1-Norm|0.2 | 0.937/0.919/0.935|313.5->281.9|2.24->1.87|
 |MobileV2| L1-Norm|0.4 | 0.937/0.504/0.918|313.5->250.6|2.24->1.51|
 |MobileV2| L1-Norm|0.6 | 0.937/0.100/0.844|313.5->225.5|2.24->1.15|
-|MobileV2| Slimming|0.2 | 0.922/0.891/0.920|313.5->277.2|2.24->1.82|
-|MobileV2| Slimming|0.4 | 0.922/0.865/0.920|313.5->244.5|2.24->1.41|
-|MobileV2| Slimming|0.6 | 0.922/0.686/0.915|313.5->214.5|2.24->0.98|
+|MobileV2| Slimming|0.2 | 0.922/0.902/0.920|313.5->277.2|2.24->1.82|
+|MobileV2| Slimming|0.4 | 0.922/0.876/0.920|313.5->244.5|2.24->1.41|
+|MobileV2| Slimming|0.6 | 0.922/0.485/0.915|313.5->214.5|2.24->0.98|
 
 ## TODO
 ### Pruning Methodsd
