@@ -23,8 +23,8 @@ This repository aim to try out different pruning-approaches on lightweight Backb
 
 ## TODO
 ### Pruning Methodsd
-- [x] l1-norm pruner
-- [x] Slimming pruner
+- [x] [l1-norm pruner](https://arxiv.org/abs/1608.08710)
+- [x] [Slimming pruner](https://arxiv.org/abs/1708.06519)
 - [ ] ThiNet
 - [ ] Soft filter pruning  
 **....**
