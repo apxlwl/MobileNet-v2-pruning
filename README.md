@@ -16,7 +16,7 @@ This repository aim to try out different pruning-approaches on lightweight Backb
     ```
 ## Results on Cifar10
 |  BackBone| Pruner | Prune Ratio| Original/Pruned/Finetuned Accuracy | FLOPs(M)| Params(M)|
-| :---: | :------: |:------: |  :--------------------------: | a:-----------------: | :-------------------: |
+| :---: | :------: |:------: |  :--------------------------: | :-----------------: | :-------------------: |
 |MobileV2| L1-Norm|0.6 | 0.937/0.100/0.844|313.5->225.5|2.24->1.15|
 |MobileV2| Slimming|0.6 | 0.922/0.485/0.915|313.5->214.5|2.24->0.98|
 |MobileV2| AutoSlim|<200 flops| 0.920/0.561/0.916|313.5->199.67|2.24->0.81|
