@@ -2,27 +2,30 @@
 This repository aim to try out different pruning-approaches on lightweight Backbones.
 
 ## Usage
-1. Training (about with ReduceLROnPlateau scheduler)
+1. Training
     ```
-   python main.py --sr(for slimming) 
+   python main.py --arch MobileNetV2 (for l1norm pruner )
+   python main.py --sr --arch MobileNetV2 (for slimming pruner) 
+   python main.py --arch USMobileNetV2 (for Autoslim pruner )
     ```
 2. Pruning (prune+finetune)
     ```
-   python prune.py --pruner l1normpruner --pruneratio 0.2
-   python prune.py --pruner SlimmingPruner --sr --pruneratio 0.2
+   python prune.py --arch MobileNetV2 --pruner l1normpruner --pruneratio 0.6
+   python prune.py --arch MobileNetV2 --pruner SlimmingPruner --sr --pruneratio 0.6
+   python prune.py --arch USMobileNetV2 --pruner AutoSlimPruner
     ```
 ## Results on Cifar10
 |  BackBone| Pruner | Prune Ratio| Original/Pruned/Finetuned Accuracy | FLOPs(M)| Params(M)|
-| :---: | :------: |:------: |  :--------------------------: | :-----------------: | :-------------------: |
+| :---: | :------: |:------: |  :--------------------------: | a:-----------------: | :-------------------: |
 |MobileV2| L1-Norm|0.6 | 0.937/0.100/0.844|313.5->225.5|2.24->1.15|
 |MobileV2| Slimming|0.6 | 0.922/0.485/0.915|313.5->214.5|2.24->0.98|
 |MobileV2| AutoSlim|<200 flops| 0.920/0.561/0.916|313.5->199.67|2.24->0.81|
 
 ## TODO
 ### Pruning Methodsd
-- [x] l1-norm pruner
-- [x] Slimming pruner
-- [x] AutoSlim
+- [x] [l1-norm pruner](https://arxiv.org/abs/1608.08710)
+- [x] [Slimming pruner](https://arxiv.org/abs/1708.06519)
+- [x] [AutoSlim](https://arxiv.org/abs/1903.11728)
 - [ ] ThiNet
 - [ ] Soft filter pruning  
 **....**
