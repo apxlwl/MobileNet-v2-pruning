@@ -22,7 +22,6 @@ This repository aim to try out different pruning-approaches on lightweight Backb
 ### Pruning Methodsd
 - [x] l1-norm pruner
 - [x] Slimming pruner
-- [x] AutoSlim
 - [ ] ThiNet
 - [ ] Soft filter pruning  
 **....**
