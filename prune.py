@@ -9,7 +9,8 @@ import torch.optim as optim
 from os.path import join
 import json
 
-from thop import clever_format,profile
+from thop import clever_format, profile
+
 os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 parser = argparse.ArgumentParser(description='Mobilev2 Pruner')
@@ -37,9 +38,10 @@ parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
 parser.add_argument('--save', default='checkpoints', type=str, metavar='PATH',
                     help='path to save prune model (default: current directory)')
-parser.add_argument('--arch', default='MobileNetV2', type=str,
+parser.add_argument('--arch', default='USMobileNetV2', type=str, choices=['USMobileNetV2', 'MobileNetV2'],
                     help='architecture to use')
-parser.add_argument('--pruner', default='l1normPruner', type=str,
+parser.add_argument('--pruner', default='AutoSlimPruner', type=str,
+                    choices=['AutoSlimPruner', 'SlimmingPruner', 'l1normPruner'],
                     help='architecture to use')
 parser.add_argument('--pruneratio', default=0.4, type=float,
                     help='architecture to use')
@@ -48,8 +50,8 @@ parser.add_argument('--sr', dest='sr', action='store_true',
 
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
-savepath=os.path.join(args.save,args.arch,'sr' if args.sr else 'nosr')
-args.savepath=savepath
+savepath = os.path.join(args.save, args.arch, 'sr' if args.sr else 'nosr')
+args.savepath = savepath
 kwargs = {'num_workers': 4, 'pin_memory': True} if args.cuda else {}
 train_loader = torch.utils.data.DataLoader(
     datasets.CIFAR10('data.cifar10', train=True, download=True,
@@ -68,40 +70,46 @@ test_loader = torch.utils.data.DataLoader(
     batch_size=args.test_batch_size, shuffle=True, **kwargs)
 
 model = models.MobileNetV2()
-model.load_state_dict(torch.load(join(savepath,'model_best.pth.tar'))['state_dict'])
-newmodel=models.MobileNetV2()
+if args.arch == 'USMobileNetV2':
+    model.load_state_dict(torch.load(join(savepath, 'trans.pth')))
+elif args.arch == 'MobileNetV2':
+    model.load_state_dict(torch.load(join(savepath, 'model_best.pth.tar'))['state_dict'])
+
+print("Best trained model loaded.")
+newmodel = models.MobileNetV2()
 
 if args.cuda:
     model.cuda().eval()
     newmodel.cuda().eval()
-best_prec1=-1
+best_prec1 = -1
 optimizer = optim.SGD(model.parameters(), lr=args.finetunelr, momentum=args.momentum, weight_decay=args.weight_decay)
 
-if args.pruner=='l1normPruner':
-    kwargs={'pruneratio':args.pruneratio}
-if args.pruner=='SlimmingPruner':
+if args.pruner == 'l1normPruner':
     kwargs = {'pruneratio': args.pruneratio}
-pruner=pruner.__dict__[args.pruner](model=model,newmodel=newmodel,testset=test_loader,trainset=train_loader,
-                                    optimizer=optimizer,args=args,**kwargs)
+elif args.pruner == 'SlimmingPruner':
+    kwargs = {'pruneratio': args.pruneratio}
+elif args.pruner == 'AutoSlimPruner':
+    kwargs = {'prunestep': 16, 'constrain': 200e6}
+
+pruner = pruner.__dict__[args.pruner](model=model, newmodel=newmodel, testset=test_loader, trainset=train_loader,
+                                      optimizer=optimizer, args=args, **kwargs)
 pruner.prune()
 ##---------count op
-input=torch.randn(1,3,32,32).cuda()
-flops, params = profile(model, inputs=(input, ),verbose=False)
+input = torch.randn(1, 3, 32, 32).cuda()
+flops, params = profile(model, inputs=(input,), verbose=False)
 flops, params = clever_format([flops, params], "%.3f")
-flopsnew, paramsnew = profile(newmodel, inputs=(input, ),verbose=False)
+flopsnew, paramsnew = profile(newmodel, inputs=(input,), verbose=False)
 flopsnew, paramsnew = clever_format([flopsnew, paramsnew], "%.3f")
-print("flops:{}->{}, params: {}->{}".format(flops,flopsnew,params,paramsnew))
-accold=pruner.test(newmodel=False)
+print("flops:{}->{}, params: {}->{}".format(flops, flopsnew, params, paramsnew))
+accold = pruner.test(newmodel=False, cal_bn=False)
+accpruned = pruner.test(newmodel=True)
+accfinetune = pruner.finetune()
 
-accpruned=pruner.test(newmodel=True)
+print("original performance:{}, pruned performance:{},finetuned:{}".format(accold, accpruned, accfinetune))
 
-accfinetune=pruner.finetune()
-
-print("original performance:{}, pruned performance:{},finetuned:{}".format(accold,accpruned,accfinetune))
-
-with open(join(savepath,'{}.json'.format(args.pruneratio)),'w') as f:
+with open(join(savepath, '{}.json'.format(args.pruneratio)), 'w') as f:
     json.dump({
-        'accuracy_original':accold,
+        'accuracy_original': accold,
         'accuracy_pruned': accpruned,
         'accuracy_finetune': accfinetune,
-    },f)
+    }, f)

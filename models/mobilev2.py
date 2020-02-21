@@ -132,9 +132,9 @@ class MobileNetV2(nn.Module):
         return x
 
 if __name__ == '__main__':
-    net=MobileNetV2(input_size=32)
-    print(net)
-    assert 0
+    from thop import profile,clever_format
+    net=MobileNetV2(input_size=32,width_mult=0.4)
     inp=torch.ones(1,3,32,32)
-    out=net(inp)
-    print(out.shape)
+    f,p=profile(net,(inp,))
+    f,p=clever_format([f,p])
+    print(f,p)

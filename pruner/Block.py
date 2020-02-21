@@ -13,6 +13,7 @@ class Baselayer:
         self.statedict = [s for s in statedict if len(s.shape) != 0]
         self.prunemask = None
         self.bnscale=None
+        self.keepoutput=False
     def clone2module(self, module: nn.Module, inputmask,keepoutput:bool):
         raise NotImplementedError
 
@@ -41,10 +42,10 @@ class CB(Baselayer):
         self.inputchannel = self.statedict[0].shape[1]
         self.outputchannel = self.statedict[-1].shape[0]
         self.bnscale=self.statedict[1].abs().clone()
-    def clone2module(self, module: nn.Module, inputmask,keepoutput=False):
+    def clone2module(self, module: nn.Module, inputmask):
         modulelayers = [m for m in module.modules() if isinstance(m, nn.Conv2d) or isinstance(m, nn.BatchNorm2d)]
         temp = self.statedict[0][:, inputmask.tolist(), :, :]
-        if keepoutput:
+        if self.keepoutput:
             modulelayers[0].weight.data = temp.clone()
             self._cloneBN(modulelayers[1],self.statedict[1:5],torch.arange(self.statedict[1].shape[0]))
         else:
@@ -72,7 +73,6 @@ class InverRes(Baselayer):
             self._cloneBN(modulelayers[3], self.statedict[6:10], torch.arange(self.statedict[6].shape[0]))
 
         if self.numlayer == 3:
-
             temp = self.statedict[0][:, inputmask.tolist(), :, :]
             modulelayers[0].weight.data = temp[self.prunemask.tolist(), :, :, :].clone()
             self._cloneBN(modulelayers[1],self.statedict[1:5],self.prunemask)

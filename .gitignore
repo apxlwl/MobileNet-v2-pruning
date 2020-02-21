@@ -7,3 +7,5 @@ data.cifar10/
 data.cifar100/
 *mine.py
 *.txt
+logs/
+*.zip
