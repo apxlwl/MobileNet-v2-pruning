@@ -9,3 +9,4 @@ data.cifar100/
 *.txt
 logs/
 *.zip
+*.ipynb

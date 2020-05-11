@@ -54,5 +54,11 @@ class SlimmingPruner(BasePruner):
                     pruned_bn = pruned_bn + mask.shape[0] - torch.sum(mask)
                     b.prunemask = torch.where(mask == 1)[0]
                     print("{}:{}/{} pruned".format(b.layername,mask.shape[0] - torch.sum(mask),mask.shape[0]))
+
+        if isinstance(self.blocks[-1], FC): # If the last layer is FC
+            if isinstance(self.blocks[-2], CB): # and FC's previous layer is CB (VGG)
+                # Need to figure out left input channels for FC
+                self.blocks[-1].prunemask = self.blocks[-2].prunemask
+
         self.clone_model()
         print("Slimming Pruner done")

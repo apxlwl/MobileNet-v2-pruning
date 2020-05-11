@@ -92,5 +92,10 @@ class FC(Baselayer):
 
     def clone2module(self, module: nn.Module,inputmask=None,keepoutput=False):
         modulelayers = [m for m in module.modules() if isinstance(m, nn.Linear)]
-        modulelayers[0].weight.data=self.statedict[0].clone()
-        modulelayers[0].bias.data=self.statedict[1].clone()
+
+        if type(self.prunemask) == type(None):
+            modulelayers[0].weight.data=self.statedict[0].clone()
+            modulelayers[0].bias.data=self.statedict[1].clone()
+        else:
+            modulelayers[0].weight.data = self.statedict[0][:, self.prunemask.tolist()].clone()
+            modulelayers[0].bias.data = self.statedict[1].clone()
