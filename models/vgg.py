@@ -53,8 +53,8 @@ class VGG(nn.Module):
                 if m.bias is not None:
                     m.bias.data.zero_()
             elif isinstance(m, nn.BatchNorm2d):
-                # m.weight.data.fill_(1)
-                m.weight.data.normal_(0, 1)
+                m.weight.data.fill_(1)
+                # m.weight.data.normal_(0, 1)
                 m.bias.data.fill_(0)
             elif isinstance(m, nn.Linear):
                 m.weight.data.normal_(0, 0.01)

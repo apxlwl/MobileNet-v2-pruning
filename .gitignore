@@ -10,3 +10,4 @@ data.cifar100/
 logs/
 *.zip
 *.ipynb
+/.vscode
