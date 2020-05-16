@@ -6,6 +6,7 @@ import torch.optim as optim
 from models import MobileNetV2, InvertedResidual, sepconv_bn, conv_bn
 from pruner.Block import *
 
+from models.vgg import conv_bn_relu
 
 class BasePruner:
     def __init__(self, model, newmodel, testset, trainset, optimizer,args):
@@ -23,7 +24,7 @@ class BasePruner:
             idx = len(self.blocks)
             if isinstance(module, InvertedResidual):
                 self.blocks.append(InverRes(name, idx, idx - 1, idx + 1, list(module.state_dict().values())))
-            if isinstance(module, conv_bn):
+            if isinstance(module, conv_bn) or isinstance(module, conv_bn_relu):
                 self.blocks.append(CB(name, idx, idx - 1, idx + 1, list(module.state_dict().values())))
             if isinstance(module, nn.Linear):
                 self.blocks.append(FC(name, idx, idx - 1, idx + 1, list(module.state_dict().values())))
@@ -103,7 +104,7 @@ class BasePruner:
     def clone_model(self):
         blockidx = 0
         for name, m0 in self.newmodel.named_modules():
-            if not isinstance(m0, InvertedResidual) and not isinstance(m0, conv_bn) and not isinstance(m0, nn.Linear):
+            if not isinstance(m0, InvertedResidual) and not isinstance(m0, conv_bn) and not isinstance(m0, nn.Linear) and not isinstance(m0, conv_bn_relu):
                 continue
             block = self.blocks[blockidx]
             curstatedict = block.statedict
