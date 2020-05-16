@@ -5,7 +5,6 @@ import os
 import torch
 import torch.nn as nn
 from pruner.Block import *
-from models import MobileNetV2, InvertedResidual, sepconv_bn, conv_bn
 def css_thresholding(x,OT_DISCARD_PERCENT):
     MIN_SCALING_FACTOR = 1e-18
     x[x < MIN_SCALING_FACTOR] = MIN_SCALING_FACTOR

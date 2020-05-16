@@ -55,10 +55,10 @@ torch.manual_seed(args.seed)
 if args.cuda:
     torch.cuda.manual_seed(args.seed)
 
-if not os.path.exists(args.save):
-    os.makedirs(args.save)
-savepath = os.path.join(args.save, args.arch, 'sr' if args.sr else 'nosr')
 
+savepath = os.path.join(args.save, args.arch, 'sr' if args.sr else 'nosr')
+if not os.path.exists(savepath):
+    os.makedirs(savepath)
 kwargs = {'num_workers': 4, 'pin_memory': True} if args.cuda else {}
 if args.dataset == 'cifar10':
     train_loader = torch.utils.data.DataLoader(
@@ -112,7 +112,6 @@ if args.resume:
     else:
         print("=> no checkpoint found at '{}'".format(args.resume))
 
-
 def updateBN():
     for m in model.modules():
         if isinstance(m, nn.BatchNorm2d):
@@ -164,7 +163,7 @@ def trainUS():
         ###
         optimizer.step()
 
-def test(test_width=1.0,recal=False):
+def test(epoch,test_width=1.0,recal=False):
     model.eval()
     test_loss = 0
     correct = 0
@@ -191,7 +190,7 @@ def test(test_width=1.0,recal=False):
         correct += pred.eq(target.data.view_as(pred)).cpu().sum()
 
     test_loss /= len(test_loader.dataset)
-    print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.1f}%)\n'.format(
+    print('\nEpoch: {} Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.1f}%)\n'.format(epoch,
         test_loss, correct, len(test_loader.dataset),
         100. * correct / len(test_loader.dataset)))
     return correct.item() / float(len(test_loader.dataset))
@@ -229,10 +228,10 @@ else:
     for epoch in range(args.start_epoch, args.epochs):
         if args.arch=='USMobileNetV2':
             trainUS()
-            prec1=test(test_width=1.0,recal=False)
+            prec1=test(test_width=1.0,recal=False,epoch=epoch)
         else:
             train()
-            prec1 = test()
+            prec1 = test(epoch=epoch)
         scheduler.step(epoch)
         lr_current = optimizer.param_groups[0]['lr']
         print("currnt lr:{}".format(lr_current))

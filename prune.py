@@ -4,7 +4,7 @@ import os
 import argparse
 import torch
 from torchvision import datasets, transforms
-import models
+from models import *
 import torch.optim as optim
 from os.path import join
 import json
@@ -38,7 +38,7 @@ parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
 parser.add_argument('--save', default='checkpoints', type=str, metavar='PATH',
                     help='path to save prune model (default: current directory)')
-parser.add_argument('--arch', default='MobileNetV2', type=str, choices=['USMobileNetV2', 'MobileNetV2'],
+parser.add_argument('--arch', default='MobileNetV2', type=str, choices=['USMobileNetV2', 'MobileNetV2','VGG'],
                     help='architecture to use')
 parser.add_argument('--pruner', default='SlimmingPruner', type=str,
                     choices=['AutoSlimPruner', 'SlimmingPruner', 'l1normPruner'],
@@ -69,14 +69,15 @@ test_loader = torch.utils.data.DataLoader(
     ])),
     batch_size=args.test_batch_size, shuffle=True, **kwargs)
 
-model = models.MobileNetV2()
+model = eval(args.arch)(input_size=32)
+newmodel = eval(args.arch)(input_size=32)
 if args.arch == 'USMobileNetV2':
     model.load_state_dict(torch.load(join(savepath, 'trans.pth')))
-elif args.arch == 'MobileNetV2':
+else:
     model.load_state_dict(torch.load(join(savepath, 'model_best.pth.tar'))['state_dict'])
 
 print("Best trained model loaded.")
-newmodel = models.MobileNetV2()
+
 
 if args.cuda:
     model.cuda().eval()

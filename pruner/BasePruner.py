@@ -3,7 +3,7 @@ import torch
 from tqdm import tqdm
 import torch.nn.functional as F
 import torch.optim as optim
-from models import MobileNetV2, InvertedResidual, sepconv_bn, conv_bn
+from models import MobileNetV2, InvertedResidual, sepconv_bn, conv_bn_relu
 from pruner.Block import *
 
 from models.vgg import conv_bn_relu
@@ -24,7 +24,10 @@ class BasePruner:
             idx = len(self.blocks)
             if isinstance(module, InvertedResidual):
                 self.blocks.append(InverRes(name, idx, idx - 1, idx + 1, list(module.state_dict().values())))
-            if isinstance(module, conv_bn) or isinstance(module, conv_bn_relu):
+            if isinstance(module, conv_bn_relu):
+                print(module)
+                for k,v in module.state_dict().items():
+                    print(k,v.shape)
                 self.blocks.append(CB(name, idx, idx - 1, idx + 1, list(module.state_dict().values())))
             if isinstance(module, nn.Linear):
                 self.blocks.append(FC(name, idx, idx - 1, idx + 1, list(module.state_dict().values())))
@@ -82,7 +85,7 @@ class BasePruner:
 
     def finetune(self):
         best_prec1 = 0
-        for epoch in range(1):
+        for epoch in range(3):
             self.train()
             prec1 = self.test()
             self.scheduler.step(prec1)
@@ -104,7 +107,7 @@ class BasePruner:
     def clone_model(self):
         blockidx = 0
         for name, m0 in self.newmodel.named_modules():
-            if not isinstance(m0, InvertedResidual) and not isinstance(m0, conv_bn) and not isinstance(m0, nn.Linear) and not isinstance(m0, conv_bn_relu):
+            if not isinstance(m0, InvertedResidual) and not isinstance(m0, conv_bn_relu) and not isinstance(m0, nn.Linear) and not isinstance(m0, conv_bn_relu):
                 continue
             block = self.blocks[blockidx]
             curstatedict = block.statedict

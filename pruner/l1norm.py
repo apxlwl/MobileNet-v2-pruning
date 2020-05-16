@@ -5,7 +5,6 @@ import os
 import torch
 import torch.nn as nn
 from pruner.Block import *
-from models import MobileNetV2, InvertedResidual, sepconv_bn, conv_bn
 
 
 class l1normPruner(BasePruner):
