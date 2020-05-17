@@ -38,7 +38,8 @@ parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
 parser.add_argument('--save', default='checkpoints', type=str, metavar='PATH',
                     help='path to save prune model (default: current directory)')
-parser.add_argument('--arch', default='MobileNetV2', type=str, choices=['USMobileNetV2', 'MobileNetV2','VGG'],
+parser.add_argument('--arch', default='MobileNetV2', type=str, choices=['USMobileNetV2', 'MobileNetV2','VGG',
+                                                                        'ShuffleNetV2','resnet50'],
                     help='architecture to use')
 parser.add_argument('--pruner', default='SlimmingPruner', type=str,
                     choices=['AutoSlimPruner', 'SlimmingPruner', 'l1normPruner'],
