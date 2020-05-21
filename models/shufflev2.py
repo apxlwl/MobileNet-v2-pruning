@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from models.baseblock import ShuffleV2Block
+from models.baseblock import ShuffleV2Block, conv_bn_relu
 
 
 class ShuffleNetV2(nn.Module):
@@ -51,15 +51,17 @@ class ShuffleNetV2(nn.Module):
                 
         self.features = nn.Sequential(*self.features)
 
-        self.conv_last = nn.Sequential(
-            nn.Conv2d(input_channel, self.stage_out_channels[-1], 1, 1, 0, bias=False),
-            nn.BatchNorm2d(self.stage_out_channels[-1]),
-            nn.ReLU(inplace=True)
-        )
+        # self.conv_last = nn.Sequential(
+        #     nn.Conv2d(input_channel, self.stage_out_channels[-1], 1, 1, 0, bias=False),
+        #     nn.BatchNorm2d(self.stage_out_channels[-1]),
+        #     nn.ReLU(inplace=True)
+        # )
+        self.conv_last = conv_bn_relu(input_channel, self.stage_out_channels[-1], 1, 1, 0, 'relu')
+
         self.globalpool = nn.AdaptiveAvgPool2d(output_size=(1,1))
         if self.model_size == '2.0x':
             self.dropout = nn.Dropout(0.2)
-        self.classifier = nn.Sequential(nn.Linear(self.stage_out_channels[-1], n_class, bias=False))
+        self.classifier = nn.Sequential(nn.Linear(self.stage_out_channels[-1], n_class, bias=True))
         self._initialize_weights()
 
     def forward(self, x):
@@ -70,7 +72,8 @@ class ShuffleNetV2(nn.Module):
         x = self.globalpool(x)
         if self.model_size == '2.0x':
             x = self.dropout(x)
-        x = x.contiguous().view(-1, self.stage_out_channels[-1])
+        # x = x.contiguous().view(-1, self.stage_out_channels[-1])
+        x = x.squeeze()
         x = self.classifier(x)
         return x
 

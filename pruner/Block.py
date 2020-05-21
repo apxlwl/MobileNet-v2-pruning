@@ -164,22 +164,35 @@ class ShuffleLayer(Baselayer):
         self.outputchannel = self.statedict[-1].shape[0]
         self.numlayer = len(self.statedict) // 5
         if self.numlayer == 3:
-            self.bnscale = self.statedict[1].abs().clone()
+            # self.bnscale = self.statedict[1].abs().clone()
+            self.bnscale = self.statedict[6].abs().clone()
         elif self.numlayer == 5:
-            self.bnscale = None
+            # self.bnscale = None
+            self.bnscale = self.statedict[1].abs().clone()
         else:
             assert NotImplementedError
-        print(self.numlayer)
+        # print(self.numlayer)
 
     def clone2module(self, module: nn.Module, inputmask, keepoutput=False):
         modulelayers = [m for m in module.modules() if isinstance(m, nn.Conv2d) or isinstance(m, nn.BatchNorm2d)]
         if self.numlayer == 5:
             modulelayers[0].weight.data = self.statedict[0][inputmask.tolist(), :, :, :].clone()
-            modulelayers[0].groups = inputmask.shape[0]
             self._cloneBN(modulelayers[1], self.statedict[1:5], inputmask)
 
-            modulelayers[2].weight.data = self.statedict[5][:, inputmask.tolist(), :, :].clone()
+            modulelayers[2].weight.data = self.statedict[5][self.prunemask.tolist(), :, :, :].clone()
+            modulelayers[2].groups = self.prunemask.shape[0]
             self._cloneBN(modulelayers[3], self.statedict[6:10], torch.arange(self.statedict[6].shape[0]))
+
+            modulelayers[4].weight.data = self.statedict[10][:, self.prunemask.tolist(), :, :].clone()
+            self._cloneBN(modulelayers[5], self.statedict[11:15], torch.arange(self.statedict[11].shape[0]))
+
+            # branch_proj: no prunning currently, just copy
+            modulelayers[6].weight.data = self.statedict[15].clone()
+            modulelayers[6].groups = self.statedict[15].shape[0]
+            self._cloneBN(modulelayers[7], self.statedict[16:20], torch.arange(self.statedict[16].shape[0]))
+
+            modulelayers[8].weight.data = self.statedict[20].clone()
+            self._cloneBN(modulelayers[9], self.statedict[21:25], torch.arange(self.statedict[21].shape[0]))
 
         if self.numlayer == 3:
             temp = self.statedict[0][:, inputmask.tolist(), :, :]
@@ -203,4 +216,5 @@ class FC(Baselayer):
     def clone2module(self, module: nn.Module, inputmask=None, keepoutput=False):
         modulelayers = [m for m in module.modules() if isinstance(m, nn.Linear)]
         modulelayers[0].weight.data = self.statedict[0][:, inputmask.tolist()].clone()
-        modulelayers[0].bias.data = self.statedict[1].clone()
+        if len(self.statedict) > 0:
+            modulelayers[0].bias.data = self.statedict[1].clone()

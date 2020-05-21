@@ -156,7 +156,7 @@ class conv_bn_relu(nn.Module):
             self.convbn = nn.Sequential(OrderedDict([
                 ('conv', nn.Conv2d(inp, oup, kernel, stride, padding, bias=False)),
                 ('bn', nn.BatchNorm2d(oup)),
-                ('relu', nn.ReLU6(inplace=True))
+                ('relu', nn.ReLU(inplace=True))
             ]))
     def forward(self, input):
         return self.convbn(input)

@@ -27,9 +27,9 @@ class BasePruner:
             if isinstance(module, InvertedResidual):
                 self.blocks.append(InverRes(name, idx, idx - 1, idx + 1, list(module.state_dict().values())))
             if isinstance(module, conv_bn_relu):
-                print(module)
-                for k, v in module.state_dict().items():
-                    print(k, v.shape)
+                # print(module)
+                # for k, v in module.state_dict().items():
+                #     print(k, v.shape)
                 self.blocks.append(CB(name, idx, idx - 1, idx + 1, list(module.state_dict().values())))
             if isinstance(module, nn.Linear):
                 self.blocks.append(FC(name, idx, idx - 1, idx + 1, list(module.state_dict().values())))
@@ -139,8 +139,35 @@ class BasePruner:
                 assert len(curstatedict) in (15, 20)
                 block.clone2module(m0, inputmask)
                 inputmask = torch.arange(block.outputchannel)
+            if isinstance(block, ShuffleLayer):
+                if block.bnscale is not None:
+                    block.clone2module(m0, inputmask)
+                    inputmask = torch.arange((block.inputchannel + block.outputchannel) / 2)
+                    if block.layername == 'features.3': # for 'features.4' stride=2, no pruning
+                        inputmask = torch.arange(block.inputchannel + block.outputchannel)
+                    if block.layername == 'features.15': # for 'conv_last' inputchannel=464
+                        inputmask = torch.arange(block.inputchannel + block.outputchannel)
             blockidx += 1
             if blockidx > (len(self.blocks) - 1): break
+        
+        for name0, m0 in self.newmodel.named_modules():
+            if name0 == 'first_conv.0':
+                for name1, m1 in self.model.named_modules():
+                    if name1 == 'first_conv.0':
+                        break
+                m0.weight.data = m1.weight.data
+                break
+        
+        for name0, m0 in self.newmodel.named_modules():
+            if name0 == 'first_conv.1':
+                for name1, m1 in self.model.named_modules():
+                    if name1 == 'first_conv.1':
+                        break
+                m0.weight.data = m1.weight.data
+                m0.bias.data = m1.bias.data
+                m0.running_mean.data = m1.running_mean.data
+                m0.running_var.data = m1.running_var.data
+                break
 
     def get_flops(self, model):
         from thop import clever_format, profile
