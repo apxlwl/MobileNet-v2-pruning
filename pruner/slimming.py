@@ -69,6 +69,17 @@ class SlimmingPruner(BasePruner):
                 pruned_bn = pruned_bn + mask.shape[0] - torch.sum(mask)
                 b.prunemask = torch.where(mask == 1)[0]
                 print("{}:{}/{} pruned".format(b.layername, mask.shape[0] - torch.sum(mask), mask.shape[0]))
+            if isinstance(b, ShuffleLayer):
+                if b.numlayer == 3:
+                    mask = b.bnscale.gt(thre)
+                    pruned_bn = pruned_bn + mask.shape[0] - torch.sum(mask)
+                    b.prunemask = torch.where(mask == 1)[0]
+                    print("{}:{}/{} pruned".format(b.layername, mask.shape[0] - torch.sum(mask), mask.shape[0]))
+                elif b.numlayer == 5:
+                    b.prunemask = torch.arange(b.bnscale.shape[0])
+                    print("{}:{}/{} pruned".format(b.layername, 0, b.prunemask.shape[0]))
+
+
         if isinstance(self.blocks[-1], FC):  # If the last layer is FC
             # FC layer cannot prune output dimension
             pass
