@@ -128,7 +128,7 @@ class ShuffleV2Block(nn.Module):
     def forward(self, old_x):
         if self.stride==1:
             x_proj, x = self.channel_shuffle(old_x)
-            s=self.branch_main(x)
+            # s=self.branch_main(x)
             return torch.cat((x_proj, self.branch_main(x)), 1)
         elif self.stride==2:
             x_proj = old_x

@@ -27,7 +27,7 @@ class ShuffleNetV2(nn.Module):
         # building first layer
         input_channel = self.stage_out_channels[1]
         self.first_conv = nn.Sequential(
-            nn.Conv2d(3, input_channel, 3, 2, 1, bias=False),
+            nn.Conv2d(3, input_channel, 3, 1, 1, bias=False),
             nn.BatchNorm2d(input_channel),
             nn.ReLU(inplace=True),
         )
@@ -102,9 +102,13 @@ class ShuffleNetV2(nn.Module):
                     nn.init.constant_(m.bias, 0)
 
 if __name__ == "__main__":
-    model = ShuffleNetV2()
+    from mythop import profile,clever_format
+    model = ShuffleNetV2().cuda()
     # print(model)
 
-    test_data = torch.rand(5, 3, 32, 32)
+    input = torch.randn(1, 3, 32, 32).cuda()
+    flops, params = profile(model, inputs=(input,), verbose=False)
+    flops, params = clever_format([flops, params], "%.3f")
+    print(flops,params)
     test_outputs = model(test_data)
     print(test_outputs.size())

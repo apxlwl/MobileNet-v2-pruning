@@ -19,14 +19,15 @@ This repository aim to try out different pruning-approaches on lightweight Backb
 | :---: | :------: |:------: |  :--------------------------: | :-----------------: |:-------------------: |
 |MobileV2| L1-Norm|0.6 | 0.937/0.100/0.844|313.5->225.5|2.24->1.15|
 |MobileV2| Slimming|Optimal Thres | 0.922/0.485/0.915|313.5->214.5|2.24->0.98|
-|MobileV2| AutoSlim|<200 flops| 0.922/0.795/0.919|313.5->218.5|2.24->1.037|
-|VGG| Slimming| Optimal Thres|0.926/0.183/0.920 | 399.3->192.67|20.03->1.49|
-|Resnet50| Slimming| Optimal Thres|0.926/0.665/0.921 | 3448->1739|23.52->6.00|
+|MobileV2| AutoSlim|<200 flops| 0.922/0.795/0.919|313.5->127.5|2.24->1.037|
+|VGG| Slimming| Optimal Thres|0.926/0.183/0.920 | 399.3->147.8|20.03->1.49|
+|Resnet50| Slimming| Optimal Thres|0.926/0.665/0.921 | 3448->975|23.52->6.00|
+|ShuffleNetV2| Slimming| Optimal Thres|0.897/0.894/0.895 | 348.6->188.5|2.22->1.24|
 
 NOTE:   
 1. args for VGG: --arch VGG --s 0.001 --sr --lr 0.02 --epochs 100
 2. args for resnet: --arch resnet50 --s 0.001 --sr --lr 0.02 --epochs 100   
-  
+3. args for shufflenet: --arch ShuffleNetV2 --s 0.007 --sr --lr 0.001 --epochs 100   
     **Try yourself with different arguments!**  
 ## TODO
 ### Pruning Methodsd
@@ -38,7 +39,9 @@ NOTE:
 **....**
 ### Backbones
 - [x] MobileV2
-- [ ] ShuffleNet  
+- [x] ShuffleNet
+- [x] VGG
+- [x] ResNet  
 **....**
 
 ## Reference

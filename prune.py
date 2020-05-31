@@ -9,7 +9,7 @@ import torch.optim as optim
 from os.path import join
 import json
 
-from thop import clever_format, profile
+from mythop import clever_format, profile
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
